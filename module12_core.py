@@ -20,7 +20,7 @@ def rotate(v, rx, ry, rz):
     return v
 
 
-def transrotateplane(imavol, rotx, roty, rotz, trans):
+def transrotateplane(imavol, rotx, roty, rotz, transx, transy, transz):
 
     v1 = np.array([0, 0, 1])
     v2 = rotate(v1, 90, 0, 0)
@@ -30,19 +30,20 @@ def transrotateplane(imavol, rotx, roty, rotz, trans):
     v2 = rotate(v2, rotx, roty, rotz)
     v3 = rotate(v3, rotx, roty, rotz)
 
-    transx = trans * (abs(v1[0])) / (abs(v1[1]) + (abs(v1[0])) + abs(v1[2]))
-    transy = trans * (abs(v1[1])) / (abs(v1[1]) + (abs(v1[0])) + abs(v1[2]))
-    transz = trans * (abs(v1[2])) / (abs(v1[1]) + (abs(v1[0])) + abs(v1[2]))
-
     point = np.array([imavol.shape[0]/2 + transx, imavol.shape[1]/2 + transy, 0 + transz])
 
-    p, q = np.meshgrid(range(int(2 * max(imavol.shape))), range(int(2 * max(imavol.shape))))
+    shapes = sorted(imavol.shape)
+
+    meshsize = np.sqrt(np.square(shapes[-1])+np.square(shapes[-2]))
+
+    p, q = np.meshgrid(range(int(1.2 * meshsize)), range(int(1.2 * meshsize)))
 
     x = point[0] + v2[0] * p + v3[0] * q
     y = point[1] + v2[1] * p + v3[1] * q
     z = point[2] + v2[2] * p + v3[2] * q
-    x = x - 1/2*imavol.shape[0]
-    y = y - 1/2*imavol.shape[1]
+
+    x = x - 1 / 2 * imavol.shape[0]
+    y = y - 1 / 2 * imavol.shape[1]
 
     return [x, y, z]
 
@@ -141,3 +142,9 @@ def interpolatemri(imavol, x, y, z):
    masky = np.all(np.isnan(pointsimage) | np.equal(pointsimage, 0), axis=1)
    pointsimage = pointsimage[~masky]
    return pointsimage
+
+def rotimageleft(image):
+    return np.rot90(image)
+
+def rotimageright(image):
+    return np.rot90(image,3)
